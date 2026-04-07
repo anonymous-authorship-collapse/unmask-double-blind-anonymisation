@@ -8,13 +8,13 @@ from typing import List, Dict, Set, Optional
 RECOMMENDATIONS_API_URL = "https://api.semanticscholar.org/recommendations/v1"
 API_KEY = "AiGjHlIqtd6a9W7gu2p9648u5rZvUSBPaxi8xXGM"
 INPUT_FILE = "../../data/dataset_paper_count.ndjson"
-OUTPUT_FILE = "junior_author-count_id_dataset_recommended.ndjson"
+OUTPUT_FILE = "junior_author-count_id_dataset_recommended.ndjson" #senior_author-count_id_dataset_recommended.ndjson
 NUM_DISTRACTORS = 4
 MIN_CANDIDATES = 5
 SEED = 42
 random.seed(SEED)
 SAMPLE_SIZE = 12000
-TRUE_AUTHOR_MODE = "junior"
+TRUE_AUTHOR_MODE = "junior" #senior
 
 # --- Logging Setup ---
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')

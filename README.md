@@ -1,8 +1,10 @@
 Paper Experiment Repository
 
-Unmasking Double-Blind Peer Review using LLMs
+Large Language Models Threaten Double-Blind Review
 
-This repository contains the full experimental pipeline used to evaluate LLM-based author attribution, combining confidence ranking, dynamic-K evaluation, ensemble aggregation, and debate-based reasoning. The framework is designed to analyze both accuracy and uncertainty, moving beyond fixed Top-K metrics toward confidence-adaptive decision rules and reasoned consensus.
+This repository contains a full experimental pipeline for evaluating LLM-based author attribution under double-blind review conditions. It integrates confidence-aware ranking, dynamic-K evaluation, ensemble aggregation, and debate-based reasoning.
+
+The framework goes beyond traditional Top-K evaluation by modeling uncertainty, belief accumulation, and inter-model disagreement.
 
 📁 Repository Structure
 .
@@ -15,21 +17,26 @@ This repository contains the full experimental pipeline used to evaluate LLM-bas
 │   │   ├── 01_harvest_semanticscholar.py
 │   │   ├── 02_contamination_filtering.py
 │   │   └── 03_get_random_authors_name.py
+│   │   └── 04_get_authors_paper_count.py
+│   │   └── 05_fieldsOfStudy_filtering.py
 │   │
 │   ├── Dataset_construction
 │   │   ├── build_random_authors_dataset.py
 │   │   └── build_recommended_authors_dataset.py
+│   │   └── build_recommended_authors_fieldsOfStudy_dataset.py
+│   │   └── build_recommended_authors_seniority_dataset.py
 │   │
-│   ├── Confidence-ranking
-│   │   └── ollama_script_confidence.py
+│   ├── Model_Prompting
+│   │   └── model_single_round_prediction.py
+│   │   └── models_multi_round_prediction.py
 │   │
-│   ├── Debate&Aggregation
-│   │   ├── aggregate_results.py
-│   │   └── ollama_script_debate_score.py
+│   ├── Model_Aggregation
+│   │   ├── models_results_aggregation.py
 │   │
 │   └── Evaluation
-│       ├── evaluation.py
+│       ├── threshold_evaluation.py
 │       └── evaluation_metrics.py
+│       └── plot.py
 │
 └── README.md
 
@@ -40,10 +47,11 @@ Data Harvesting & Filtering
         │
         ▼
 Dataset Construction
- ┌──────────────────────┐
- │ Easy Dataset         │ ← Random authors
- │ Hard Dataset         │ ← Thematic authors
- └──────────────────────┘
+ ┌─────────────────────────────────────────┐
+ │ Random & Thematic authors Dataset       │
+ │ Senior & Junior authors Dataset         │
+ | Disciplines Dataset                     |
+ └─────────────────────────────────────────┘
         │
         ▼
 Confidence Ranking (LLM)
@@ -60,15 +68,21 @@ Final Evaluation & Analysis
 
 🧠 Experiment Overview
 
-This experiment evaluates how well Large Language Models can identify the true author of a scientific paper based solely on its title and abstract, under varying levels of difficulty and uncertainty.
+This project evaluates whether Large Language Models can infer the true author of a scientific paper using only its title and abstract.
 
-Key Contributions
+It systematically studies:
 
-- Confidence-based ranking instead of hard Top-K
-- Dynamic-K evaluation using cumulative belief thresholds
-- Multi-model aggregation without retraining
-- Explicit LLM disagreement resolution via debate
-- Statistical significance testing and calibration analysis
+- Attribution accuracy
+- Model confidence calibration
+- Sensitivity to distractor difficulty
+- Inter-model disagreement
+
+⭐ Key Contributions
+- Confidence-based ranking instead of fixed Top-K
+- Dynamic-K evaluation via cumulative belief thresholds
+- Model aggregation without retraining
+- Debate-based reasoning for disagreement resolution
+- Statistical testing and calibration analysis
 
 ⚙️ Prerequisites
 
@@ -94,14 +108,14 @@ Output:
 initial_candidate_papers.ndjson
 
 02_contamination_filtering.py
-- Removes papers previously posted as arXiv preprints
-- Uses fuzzy title matching + arXiv API
+- Removes papers previously posted as arXiv and medRxiv preprints
+- Uses fuzzy title matching + arXiv and medRxiv API
 
 ```bash
 python Scripts/Data_harvest_filtering/02_contamination_filtering.py
 ```
 Output:
-filtered_papers_stage1_arxiv.ndjson
+filtered_papers_curated.ndjson
 
 03_get_random_authors_name.py
 - Builds a pool of random authors from diverse fields
@@ -112,9 +126,27 @@ python Scripts/Data_harvest_filtering/03_get_random_authors_name.py
 Output:
 random_author_pool.txt
 
+04_get_authors_paper_count.py
+- Computes the number of papers each author has published based on the harvested data.
+
+```bash
+python Scripts/Data_harvest_filtering/04_get_authors_paper_count.py
+```
+Output:
+dataset_paper_count.ndjson
+
+05_fieldsOfStudy_filtering.py
+- Filters papers based on academic disciplines / fields of study.
+
+```bash
+python Scripts/Data_harvest_filtering//05_fieldsOfStudy_filtering.py
+```
+Output:
+filtered_computer_science_papers.ndjson OR filtered_medicine_papers.ndjson
+
 
 2️⃣ Dataset Construction
-Easy Dataset — Random Distractors
+Random Distractors
 
 build_random_authors_dataset.py
 - 1 true author + 4 random distractors
@@ -127,7 +159,7 @@ python Scripts/Dataset_construction/build_random_authors_dataset.py
 Output:
 fifty_author_id_dataset_random.ndjson
 
-Hard Dataset — Thematic Distractors
+Thematic Distractors
 
 build_recommended_authors_dataset.py
 
@@ -139,11 +171,41 @@ Uses Semantic Scholar recommendations
 python Scripts/Dataset_construction/build_recommended_authors_dataset.py
 ```
 Output:
-fifty_author_id_dataset_recommended.ndjson
+author_id_dataset_recommended.ndjson
 
 
-3️⃣ Confidence Ranking (LLM Inference)
-ollama_script_confidence.py
+Fields Of study
+
+build_recommended_authors_fieldsOfStudy_dataset.py
+
+Filtered fi
+- papers' authors publication counts
+- Split datasets into Senior and Junior as true author
+
+```bash
+python Scripts/Dataset_construction/build_recommended_authors_fieldsOfStudy_dataset.py
+```
+Output:
+computer_science_dataset_recommended.ndjson OR medicine_dataset_recommended.ndjson
+
+
+Authors Seniority
+
+build_recommended_authors_seniority_dataset.py
+
+Uses Semantic Scholar to get
+- papers' authors publication counts
+- Split datasets into Senior and Junior as true author
+
+```bash
+python Scripts/Dataset_construction/build_recommended_authors_seniority_dataset.py
+```
+Output:
+junior_author-count_id_dataset_recommended.ndjson OR senior_author-count_id_dataset_recommended.ndjson
+
+
+3️⃣ Model Prompting (LLM Inference)
+model_single_round_prediction.py
 
 Purpose:
 Query LLMs to rank candidate authors and assign calibrated confidence scores.
@@ -155,7 +217,7 @@ Key Features
 - True-author confidence extraction
 
 ```bash
-python Scripts/Confidence-ranking/ollama_script_confidence.py \
+python Scripts/Model_Prompting/model_single_round_prediction.py \
   --data_file path/to/input_dataset.ndjson \
   --output_file path/to/output_results.ndjson \
   --log_file path/to/run.log \
@@ -163,8 +225,61 @@ python Scripts/Confidence-ranking/ollama_script_confidence.py \
   --workers 8
 ```
 
+
+models_multi_round_prediction.py
+Reasoned Consensus
+
+Core Idea:
+Disagreement between strong models is informative.
+
+Debate Protocol
+🟦 Round 1 — Independent Judgments
+
+One model:
+- Ranks authors
+- Assigns confidence (sum = 1)
+- Provides brief reasoning
+
+🟥 Round 2 — Second reasoning
+
+- One Model critique another model’s reasoning
+- Rankings may be revised
+
+Final Output
+- Revised confidence scores
+- Consensus ranking
+- Debate occurrence flag
+
+```bash
+python Scripts/Model_Prompting/models_multi_round_prediction.py \
+  --data_file dataset.ndjson \
+  --output_file debate_results.ndjson \
+  --log_file debate.log \
+  --model_a llama3:70b \
+  --model_b qwen2:72b \
+  --workers 2
+```
+
+
+6️⃣ Model_Aggregation (Ensemble without Training)
+models_results_aggregation.py
+
+Approach
+- Sum confidence scores across models
+- Normalize into a shared belief distribution
+- Re-rank authors
+- Robust to malformed or partial outputs.
+
+```bash
+python Scripts/Model_Aggregation/models_results_aggregation.py \
+  --inputs modelA.ndjson modelB.ndjson \
+  --output_file aggregated.ndjson \
+  --log_file aggregation.log
+```
+
+
 4️⃣ Confidence-Aware Evaluation (Dynamic-K)
-evaluation.py
+threshold_evaluation.py
 
 Key Idea:
 Instead of fixed Top-K, select authors until cumulative confidence ≥ τ.
@@ -200,57 +315,17 @@ Outputs
 roc_plot.pdf
 true_author_confidence_boxplot.pdf
 
+6️⃣ SPlot Comparison results (Discipline and seniority)
+plot.py
 
-6️⃣ Aggregation (Ensemble without Training)
-aggregate_results.py
-
-Approach
-- Sum confidence scores across models
-- Normalize into a shared belief distribution
-- Re-rank authors
-- Robust to malformed or partial outputs.
-
-```bash
-python Scripts/Debate&Aggregation/aggregate_results.py \
-  --inputs modelA.ndjson modelB.ndjson \
-  --output_file aggregated.ndjson \
-  --log_file aggregation.log
+Metrics
+- Suspect set Accuracy
+- Recall
+python Scripts/Evaluation/plot.py
 ```
+Outputs
+authorship_analysis_nature.png
 
-7️⃣ Debate-Based Attribution (Reasoned Consensus)
-ollama_script_debate_score.py
-
-Core Idea:
-Disagreement between strong models is informative.
-
-Debate Protocol
-🟦 Round 1 — Independent Judgments
-
-Each model:
-- Ranks authors
-- Assigns confidence (sum = 1)
-- Provides brief reasoning
-
-🟥 Round 2 — Debate (Conditional)
-
-Triggered only if Top-1 differs:
-- Models critique each other’s reasoning
-- Rankings may be revised
-
-Final Output
-- Averaged confidence scores
-- Consensus ranking
-- Debate occurrence flag
-
-```bash
-python Scripts/Debate&Aggregation/ollama_script_debate_score.py \
-  --data_file dataset.ndjson \
-  --output_file debate_results.ndjson \
-  --log_file debate.log \
-  --model_a llama3:70b \
-  --model_b qwen2:72b \
-  --workers 2
-```
 
 🎯 Summary
 
