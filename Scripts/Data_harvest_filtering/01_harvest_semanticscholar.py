@@ -70,7 +70,7 @@ def get_initial_papers(fields, start_date='2024', end_date='2025', limit_per_fie
 # --- Execution ---
 # Define the fields of study to query
 disciplines = [
-        # Computer Science Subfields
+    # Computer Science Subfields
     "Machine Learning", "Natural Language Processing", "Cryptography",
     "Human-Computer Interaction", "Computer Vision", "Database Systems",
     "Reinforcement Learning", "Generative Adversarial Networks", "Quantum Computing",

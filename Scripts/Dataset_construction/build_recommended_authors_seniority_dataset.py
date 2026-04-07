@@ -7,13 +7,14 @@ from typing import List, Dict, Set, Optional
 # ========== CONFIG ==========
 RECOMMENDATIONS_API_URL = "https://api.semanticscholar.org/recommendations/v1"
 API_KEY = "AiGjHlIqtd6a9W7gu2p9648u5rZvUSBPaxi8xXGM"
-INPUT_FILE = "../../data/filtered_papers_curated.ndjson"
-OUTPUT_FILE = "author_id_dataset_recommended.ndjson"
+INPUT_FILE = "../../data/dataset_paper_count.ndjson"
+OUTPUT_FILE = "junior_author-count_id_dataset_recommended.ndjson"
 NUM_DISTRACTORS = 4
 MIN_CANDIDATES = 5
 SEED = 42
 random.seed(SEED)
-SAMPLE_SIZE = 200
+SAMPLE_SIZE = 12000
+TRUE_AUTHOR_MODE = "junior"
 
 # --- Logging Setup ---
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -75,6 +76,49 @@ def get_recommended_papers_authors(paper_id: str, retries: int = 3) -> Set[str]:
 
 
 
+def select_true_author(
+    authors: List[Dict],
+    mode: str = "senior"
+) -> Optional[Dict]:
+    """
+    Selects a true author based on publication count.
+    
+    senior  -> max paperCount
+    junior  -> min paperCount
+    middle  -> median-ranked by paperCount
+    """
+    if not authors:
+        return None
+
+    # Filter authors with valid paperCount
+    valid_authors = [
+        a for a in authors
+        if isinstance(a.get("paperCount"), int)
+    ]
+
+    if not valid_authors:
+        return None
+
+    # Sort by paperCount
+    sorted_authors = sorted(
+        valid_authors,
+        key=lambda a: a["paperCount"]
+    )
+
+    if mode == "senior":
+        return sorted_authors[-1]
+
+    if mode == "junior":
+        return sorted_authors[0]
+
+    if mode == "middle":
+        mid_index = len(sorted_authors) // 2
+        return sorted_authors[mid_index]
+
+    raise ValueError(f"Unknown TRUE_AUTHOR_MODE: {mode}")
+
+
+
 # --- Main Processing Logic (Simplified) ---
 def build_new_dataset(input_path: str, output_path: str):
     processed_count = 0
@@ -119,8 +163,15 @@ def build_new_dataset(input_path: str, output_path: str):
                      skipped_count += 1
                      continue
 
-                true_author = actual_authors_list[-1]['name'] # Get last author name
+                true_author = select_true_author( actual_authors_list, mode=TRUE_AUTHOR_MODE)
 
+                if not true_author or not true_author.get("name"):
+                    logging.warning(f"Skipping paper '{paper_title}': Could not select true author.")
+                    skipped_count += 1
+                    continue
+
+                true_author_name = true_author['name']
+                
                 # --- Step 2: Get distractors from recommended papers using paperId ---
                 potential_distractors = get_recommended_papers_authors(paper_id)
 
@@ -141,7 +192,7 @@ def build_new_dataset(input_path: str, output_path: str):
                 else:
                     selected_distractors = random.sample(final_distractors, NUM_DISTRACTORS)
 
-                candidate_list = [true_author] + selected_distractors
+                candidate_list = [true_author_name] + selected_distractors
                 random.shuffle(candidate_list)
 
                 # --- Step 5: Create and write the new data entry ---
@@ -149,7 +200,7 @@ def build_new_dataset(input_path: str, output_path: str):
                     "paperId": paper_id, 
                     "title": paper_title,
                     "abstract": paper_abstract,
-                    "true_author": true_author,
+                    "true_author": true_author_name,
                     "candidate_list": candidate_list
                 }
                 

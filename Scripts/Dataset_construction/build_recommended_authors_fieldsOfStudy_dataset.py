@@ -7,8 +7,8 @@ from typing import List, Dict, Set, Optional
 # ========== CONFIG ==========
 RECOMMENDATIONS_API_URL = "https://api.semanticscholar.org/recommendations/v1"
 API_KEY = "AiGjHlIqtd6a9W7gu2p9648u5rZvUSBPaxi8xXGM"
-INPUT_FILE = "../../data/filtered_papers_curated.ndjson"
-OUTPUT_FILE = "author_id_dataset_recommended.ndjson"
+INPUT_FILE = "../../data/filtered_computer_science_papers.ndjson" #filtered_medicine_papers.ndjson
+OUTPUT_FILE = "computer_science_dataset_recommended.ndjson" #"medicine_dataset_recommended.ndjson"
 NUM_DISTRACTORS = 4
 MIN_CANDIDATES = 5
 SEED = 42

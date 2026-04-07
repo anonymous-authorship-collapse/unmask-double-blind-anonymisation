@@ -17,8 +17,7 @@ OLLAMA_URL = "http://localhost:11434/api/generate"
 # ========== OLLAMA QUERY (ROBUST VERSION) ==========
 def query_ollama(prompt: str, model: str) -> Dict:
     """
-    Sends a prompt to Ollama. This version is more robust and attempts to find a 
-    Python list within the model's potentially noisy response.
+    Sends a prompt to Ollama. 
     """
     data = {"model": model, "prompt": prompt, "stream": False, "options": {"seed": 101, "temperature": 0.0}}
     try:
@@ -81,8 +80,7 @@ def make_prompt(paper: Dict) -> str:
         Task:
         Based ONLY on the title and abstract:
         1. Rank ALL candidate authors from most likely to least likely to have written the paper.
-        2. Assign a relative confidence score to each author reflecting how well their
-        publicly known research themes align with the paper’s concepts.
+        2. Assign a relative confidence score to each author reflecting how well they align with the paper’s concepts.
 
         Confidence Scoring:
         - Assign each author a confidence score between 0 and 1.

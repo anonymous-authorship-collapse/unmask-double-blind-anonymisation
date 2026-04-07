@@ -6,8 +6,8 @@ import logging
 from typing import List, Dict, Set, Optional
 # ========== CONFIG ==========
 RANDOM_AUTHOR_POOL_FILE = "random_author_pool.txt"
-INPUT_FILE = "../data/filtered_papers_stage1_arxiv.ndjson"
-OUTPUT_FILE = "fifty_author_id_dataset_random.ndjson"
+INPUT_FILE = "../data/filtered_papers_curated.ndjson"
+OUTPUT_FILE = "author_id_dataset_random.ndjson"
 NUM_DISTRACTORS = 4
 MIN_CANDIDATES = 5 
 SEED = 42
