@@ -19,7 +19,7 @@ def query_ollama(prompt: str, model: str) -> Dict:
     """
     Sends a prompt to Ollama. 
     """
-    data = {"model": model, "prompt": prompt, "stream": False, "options": {"seed": 101, "temperature": 0.0}}
+    data = {"model": model, "prompt": prompt, "stream": False, "options": {"seed": 101, "temperature": 0.3}}
     try:
         response = requests.post(OLLAMA_URL, json=data, timeout=6000)
         response.raise_for_status()
@@ -80,12 +80,11 @@ def make_prompt(paper: Dict) -> str:
         Task:
         Based ONLY on the title and abstract:
         1. Rank ALL candidate authors from most likely to least likely to have written the paper.
-        2. Assign a relative confidence score to each author reflecting how well they align with the paper.
 
         Output Requirements:
         - Respond with a SINGLE valid JSON object and NO additional text.
         - The JSON object must contain exactly one key: "ranked_authors".
-        - "ranked_authors" must be a list of objects, each with "name" (string) and "confidence_score" (float).
+        - "ranked_authors" must be a list of objects, each with "name" (string)
         """
 
 # ========== EVALUATION METRIC (TOP-1 ACCURACY) ==========

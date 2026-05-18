@@ -6,39 +6,7 @@ This repository contains a full experimental pipeline for evaluating LLM-based a
 
 The framework goes beyond traditional Top-K evaluation by modeling uncertainty, belief accumulation, and inter-model disagreement.
 
-📁 Repository Structure
-.
-├── Data
-│   ├── initial_candidate_papers.ndjson        # 25K papers from Semantic Scholar
-│   └── random_author_pool.txt                 # 5K random author names
-│
-├── Scripts
-│   ├── Data_harvest_filtering
-│   │   ├── 01_harvest_semanticscholar.py
-│   │   ├── 02_contamination_filtering.py
-│   │   └── 03_get_random_authors_name.py
-│   │   └── 04_get_authors_paper_count.py
-│   │   └── 05_fieldsOfStudy_filtering.py
-│   │
-│   ├── Dataset_construction
-│   │   ├── build_random_authors_dataset.py
-│   │   └── build_recommended_authors_dataset.py
-│   │   └── build_recommended_authors_fieldsOfStudy_dataset.py
-│   │   └── build_recommended_authors_seniority_dataset.py
-│   │
-│   ├── Model_Prompting
-│   │   └── model_single_round_prediction.py
-│   │   └── models_multi_round_prediction.py
-│   │
-│   ├── Model_Aggregation
-│   │   ├── models_results_aggregation.py
-│   │
-│   └── Evaluation
-│       ├── threshold_evaluation.py
-│       └── evaluation_metrics.py
-│       └── plot.py
-│
-└── README.md
+![repository structure](image.png)
 
 
 🔄 Experimental Workflow
