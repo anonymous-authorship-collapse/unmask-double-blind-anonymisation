@@ -8,30 +8,7 @@ The framework goes beyond traditional Top-K evaluation by modeling uncertainty, 
 
 ![repository structure](image.png)
 
-
-🔄 Experimental Workflow
-
-Data Harvesting & Filtering
-        │
-        ▼
-Dataset Construction
- ┌─────────────────────────────────────────┐
- │ Random & Thematic authors Dataset       │
- │ Senior & Junior authors Dataset         │
- | Disciplines Dataset                     |
- └─────────────────────────────────────────┘
-        │
-        ▼
-Confidence Ranking (LLM)
-        │
-        ▼
-Confidence-Aware Evaluation
-        │
-        ▼
-Debate & Aggregation
-        │
-        ▼
-Final Evaluation & Analysis
+![Experiment workflow](image-1.png)
 
 
 🧠 Experiment Overview
